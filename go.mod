@@ -1,4 +1,4 @@
-module github.com/bilibili/kratos
+module github.com/yuanfeng0905/oasis-kratos
 
 go 1.12
 
