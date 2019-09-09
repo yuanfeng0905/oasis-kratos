@@ -543,7 +543,7 @@ type Kratos struct {
 }`
 	_tplGoMod = `module {{.ModuleName}}
 
-go 1.12
+go 1.13
 
 require (
 	github.com/yuanfeng0905/oasis-kratos v1.0.0
