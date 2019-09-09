@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/bilibili/kratos/pkg/conf/env"
-	"github.com/bilibili/kratos/pkg/log/internal/core"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/log/internal/core"
 	"github.com/bilibili/kratos/pkg/net/metadata"
 	"github.com/bilibili/kratos/pkg/net/trace"
 )
