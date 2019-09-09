@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	_getEcodeGen = "go get -u github.com/bilibili/kratos/tool/protobuf/protoc-gen-ecode"
+	_getEcodeGen = "go get -u github.com/yuanfeng0905/oasis-kratos/tool/protobuf/protoc-gen-ecode"
 	_ecodeProtoc = "protoc --proto_path=%s --proto_path=%s --proto_path=%s --ecode_out=:."
 )
 

@@ -12,7 +12,6 @@ github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24
 github.com/beorn7/perks v1.0.0 h1:HWo1m869IqiPhD389kmkxeTalrjNbbJTC8LXupb+sl0=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
-github.com/bilibili/kratos v0.2.2 h1:BWeReta0qdp5U9WIsTJx4ldQrZH2NMFR3iHsBiajPz4=
 github.com/bilibili/kratos v0.2.2/go.mod h1:dn3WW8cU7q2GW8Ma5GE4mUPyjX/wZEwF85QvBY1xR94=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cockroachdb/datadriven v0.0.0-20190531201743-edce55837238/go.mod h1:zn76sxSg3SzpJ0PPJaLDCu+Bu0Lg3sKTORVIj19EIF8=
@@ -179,6 +178,8 @@ github.com/tsuna/gohbase v0.0.0-20190502052937-24ffed0537aa/go.mod h1:3HfLQly3YN
 github.com/urfave/cli v1.20.0 h1:fDqGv3UG/4jbVl/QkFwEdddtEDjh/5Ov6X+0B/3bPaw=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
+github.com/yuanfeng0905/oasis-kratos v0.2.2 h1:BWeReta0qdp5U9WIsTJx4ldQrZH2NMFR3iHsBiajPz4=
+github.com/yuanfeng0905/oasis-kratos v0.2.2/go.mod h1:dn3WW8cU7q2GW8Ma5GE4mUPyjX/wZEwF85QvBY1xR94=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/etcd v0.0.0-20190720005121-fe86a786a4c3 h1:LlCFU/KJ9P/8QKB73kkd1z/zbm7ZJ2V4HEgEHI3N7gk=
 go.etcd.io/etcd v0.0.0-20190720005121-fe86a786a4c3/go.mod h1:N0RPWo9FXJYZQI4BTkDtQylrstIigYHeR18ONnyTufk=

@@ -11,10 +11,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bilibili/kratos/pkg/conf/env"
-	"github.com/bilibili/kratos/pkg/log"
-	"github.com/bilibili/kratos/pkg/naming"
-	wmeta "github.com/bilibili/kratos/pkg/net/rpc/warden/internal/metadata"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/env"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/log"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/naming"
+	wmeta "github.com/yuanfeng0905/oasis-kratos/pkg/net/rpc/warden/internal/metadata"
 
 	farm "github.com/dgryski/go-farm"
 	"github.com/pkg/errors"

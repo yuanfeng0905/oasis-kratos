@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"text/template"
 
-	"github.com/bilibili/kratos/pkg/ecode"
-	"github.com/bilibili/kratos/pkg/net/http/blademaster/binding"
-	"github.com/bilibili/kratos/pkg/net/http/blademaster/render"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/ecode"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/net/http/blademaster/binding"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/net/http/blademaster/render"
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/gogo/protobuf/types"

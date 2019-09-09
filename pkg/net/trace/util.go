@@ -6,8 +6,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/conf/env"
-	"github.com/bilibili/kratos/pkg/net/ip"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/env"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/net/ip"
 
 	"github.com/pkg/errors"
 )

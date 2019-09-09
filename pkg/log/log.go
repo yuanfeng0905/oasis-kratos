@@ -8,8 +8,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/bilibili/kratos/pkg/conf/env"
-	"github.com/bilibili/kratos/pkg/stat/metric"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/env"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/stat/metric"
 )
 
 // Config log config.

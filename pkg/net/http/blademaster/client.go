@@ -17,10 +17,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/conf/env"
-	"github.com/bilibili/kratos/pkg/net/metadata"
-	"github.com/bilibili/kratos/pkg/net/netutil/breaker"
-	xtime "github.com/bilibili/kratos/pkg/time"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/env"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/net/metadata"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/net/netutil/breaker"
+	xtime "github.com/yuanfeng0905/oasis-kratos/pkg/time"
 
 	"github.com/gogo/protobuf/proto"
 	pkgerr "github.com/pkg/errors"

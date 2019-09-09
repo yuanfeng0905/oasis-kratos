@@ -6,13 +6,13 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/container/group"
-	"github.com/bilibili/kratos/pkg/ecode"
-	"github.com/bilibili/kratos/pkg/log"
-	limit "github.com/bilibili/kratos/pkg/ratelimit"
-	"github.com/bilibili/kratos/pkg/stat/metric"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/container/group"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/ecode"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/log"
+	limit "github.com/yuanfeng0905/oasis-kratos/pkg/ratelimit"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/stat/metric"
 
-	cpustat "github.com/bilibili/kratos/pkg/stat/sys/cpu"
+	cpustat "github.com/yuanfeng0905/oasis-kratos/pkg/stat/sys/cpu"
 )
 
 var (

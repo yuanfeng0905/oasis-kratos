@@ -6,7 +6,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/bilibili/kratos/pkg/log"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/log"
 )
 
 // Recovery returns a middleware that recovers from any panics and writes a 500 if there was one.

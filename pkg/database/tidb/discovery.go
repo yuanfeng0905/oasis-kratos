@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/conf/env"
-	"github.com/bilibili/kratos/pkg/log"
-	"github.com/bilibili/kratos/pkg/naming"
-	"github.com/bilibili/kratos/pkg/naming/discovery"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/env"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/log"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/naming"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/naming/discovery"
 )
 
 var _schema = "tidb://"

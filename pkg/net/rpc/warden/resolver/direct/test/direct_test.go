@@ -7,12 +7,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/net/netutil/breaker"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden"
-	pb "github.com/bilibili/kratos/pkg/net/rpc/warden/internal/proto/testproto"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/resolver/direct"
-	xtime "github.com/bilibili/kratos/pkg/time"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/net/netutil/breaker"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/net/rpc/warden"
+	pb "github.com/yuanfeng0905/oasis-kratos/pkg/net/rpc/warden/internal/proto/testproto"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/net/rpc/warden/resolver"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/net/rpc/warden/resolver/direct"
+	xtime "github.com/yuanfeng0905/oasis-kratos/pkg/time"
 )
 
 type testServer struct {

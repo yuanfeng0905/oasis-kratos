@@ -1,7 +1,7 @@
 package hbase
 
 import (
-	xtime "github.com/bilibili/kratos/pkg/time"
+	xtime "github.com/yuanfeng0905/oasis-kratos/pkg/time"
 )
 
 // ZKConfig Server&Client settings.

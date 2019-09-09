@@ -8,10 +8,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bilibili/kratos/pkg/net/netutil/breaker"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden"
-	"github.com/bilibili/kratos/pkg/net/rpc/warden/internal/benchmark/bench/proto"
-	xtime "github.com/bilibili/kratos/pkg/time"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/net/netutil/breaker"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/net/rpc/warden"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/net/rpc/warden/internal/benchmark/bench/proto"
+	xtime "github.com/yuanfeng0905/oasis-kratos/pkg/time"
 
 	goproto "github.com/gogo/protobuf/proto"
 	"github.com/montanaflynn/stats"
