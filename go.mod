@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/BurntSushi/toml v0.3.1
-	github.com/yuanfeng0905/oasis-kratos v0.2.2
+	github.com/yuanfeng0905/oasis-kratos v1.0.0
 	github.com/dgryski/go-farm v0.0.0-20190423205320-6a90982ecee2
 	github.com/fatih/color v1.7.0
 	github.com/fsnotify/fsnotify v1.4.7
