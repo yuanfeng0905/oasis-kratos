@@ -513,8 +513,6 @@ import "google/api/annotations.proto";
 // package 命名使用 {appid}.{version} 的方式, version 形如 v1, v2 ..
 package demo.service.v1;
 
-// NOTE: 最后请删除这些无用的注释 (゜-゜)つロ 
-
 option go_package = "api";
 option (gogoproto.goproto_getters_all) = false;
 
