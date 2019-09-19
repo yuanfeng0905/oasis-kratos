@@ -39,12 +39,21 @@ require (
 	github.com/montanaflynn/stats v0.5.0
 	github.com/openzipkin/zipkin-go v0.2.1
 	github.com/pkg/errors v0.8.1
+<<<<<<< HEAD
 	github.com/prometheus/client_golang v1.1.0
 	github.com/remyoudompheng/bigfft v0.0.0-20190728182440-6a916e37a237 // indirect
 	github.com/russross/blackfriday v2.0.0+incompatible // indirect
 	github.com/samuel/go-zookeeper v0.0.0-20190810000440-0ceca61e4d75 // indirect
 	github.com/shirou/gopsutil v2.18.12+incompatible
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
+=======
+	github.com/prometheus/client_golang v1.0.0
+	github.com/prometheus/common v0.6.0 // indirect
+	github.com/prometheus/procfs v0.0.3 // indirect
+	github.com/remyoudompheng/bigfft v0.0.0-20190728182440-6a916e37a237 // indirect
+	github.com/samuel/go-zookeeper v0.0.0-20180130194729-c4fab1ac1bec // indirect
+	github.com/shirou/gopsutil v2.19.6+incompatible
+>>>>>>> c49c03376284f0c73aac12ef547bc0500c2f2ab6
 	github.com/siddontang/go v0.0.0-20180604090527-bdc77568d726
 	github.com/sirupsen/logrus v1.4.2
 	github.com/soheilhy/cmux v0.1.4 // indirect
