@@ -544,7 +544,11 @@ type Kratos struct {
 go 1.13
 
 require (
+<<<<<<< HEAD
 	github.com/yuanfeng0905/oasis-kratos v1.0.0
+=======
+	github.com/bilibili/kratos master
+>>>>>>> 9ee925668ec9ff7d5f3e0d5a3374f90cb6528418
 	github.com/gogo/protobuf v1.2.1
 	github.com/golang/protobuf v1.3.2
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
