@@ -76,6 +76,9 @@ import (
 	"{{.ModuleName}}/internal/service"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/paladin"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/log"
+
+	_ "go.uber.org/automaxprocs"
+
 )
 
 func main() {
@@ -127,6 +130,7 @@ import (
 	"{{.ModuleName}}/internal/service"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/paladin"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/log"
+	_ "go.uber.org/automaxprocs"
 )
 
 func main() {
