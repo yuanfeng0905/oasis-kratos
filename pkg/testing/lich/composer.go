@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/yuanfeng0905/oasis-kratospkg/log"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/log"
 )
 
 var (
