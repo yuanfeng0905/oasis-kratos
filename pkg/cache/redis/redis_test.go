@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yuanfeng0905/oasis-kratospkg/container/pool"
-	xtime "github.com/yuanfeng0905/oasis-kratospkg/time"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/container/pool"
+	xtime "github.com/yuanfeng0905/oasis-kratos/pkg/time"
 )
 
 func TestRedis(t *testing.T) {

@@ -17,8 +17,8 @@ package redis
 import (
 	"context"
 
-	"github.com/yuanfeng0905/oasis-kratospkg/container/pool"
-	xtime "github.com/yuanfeng0905/oasis-kratospkg/time"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/container/pool"
+	xtime "github.com/yuanfeng0905/oasis-kratos/pkg/time"
 )
 
 // Error represents an error returned in a command reply.

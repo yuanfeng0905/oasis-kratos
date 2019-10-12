@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yuanfeng0905/oasis-kratospkg/container/pool"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/container/pool"
 )
 
 type poolTestConn struct {

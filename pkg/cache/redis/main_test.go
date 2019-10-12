@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yuanfeng0905/oasis-kratospkg/container/pool"
-	"github.com/yuanfeng0905/oasis-kratospkg/testing/lich"
-	xtime "github.com/yuanfeng0905/oasis-kratospkg/time"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/container/pool"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/testing/lich"
+	xtime "github.com/yuanfeng0905/oasis-kratos/pkg/time"
 )
 
 var (
