@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
 	"github.com/yuanfeng0905/oasis-kratos/pkg/naming"
 	"go.etcd.io/etcd/clientv3"
 	"google.golang.org/grpc"

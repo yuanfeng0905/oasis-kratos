@@ -3,8 +3,8 @@ package auth_test
 import (
 	"fmt"
 
-	bm "github.com/yuanfeng0905/oasis-kratos/pkg/net/http/blademaster"
 	"github.com/yuanfeng0905/oasis-kratos/example/blademaster/middleware/auth"
+	bm "github.com/yuanfeng0905/oasis-kratos/pkg/net/http/blademaster"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/net/metadata"
 )
 
