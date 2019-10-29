@@ -158,6 +158,17 @@ func (client *Client) NewRequest(method, uri, realIP string, params url.Values) 
 	return
 }
 
+func (client *Client) NewJSONRequest(method, uri string, buf []byte) (req *xhttp.Request, err error) {
+	reader := bytes.NewReader(buf)
+	req, err = xhttp.NewRequest(method, uri, reader)
+	if err != nil {
+		return
+	}
+	req.Header.Set("Content-Type", "application/json;charset=UTF-8")
+	req.Header.Set("User-Agent", _noKickUserAgent+" "+env.AppID)
+	return
+}
+
 // Get issues a GET to the specified URL.
 func (client *Client) Get(c context.Context, uri, ip string, params url.Values, res interface{}) (err error) {
 	req, err := client.NewRequest(xhttp.MethodGet, uri, ip, params)
