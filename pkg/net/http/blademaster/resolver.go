@@ -54,7 +54,7 @@ func (t *ResolverTransport) filter(instances []*naming.Instance) (*url.URL, erro
 	return urls[0], nil
 }
 
-func (t *ResolverTransport) pickNode(appid string, builder naming.Builder) (instances []*naming.Instance, err error) {
+func (t *ResolverTransport) pickInstances(appid string, builder naming.Builder) (instances []*naming.Instance, err error) {
 	resolver := builder.Build(appid)
 
 	ev := resolver.Watch()
@@ -80,6 +80,7 @@ func (t *ResolverTransport) pickNode(appid string, builder naming.Builder) (inst
 		return
 	}
 
+	// all zones?
 	for _, _insts := range info.Instances {
 		instances = append(instances, _insts...)
 	}
@@ -103,7 +104,7 @@ func (t *ResolverTransport) RoundTrip(req *http.Request) (*http.Response, error)
 	*oldURL = *req.URL
 
 	if b, ok := m[req.URL.Scheme]; ok {
-		insts, err := t.pickNode(req.URL.Hostname(), b)
+		insts, err := t.pickInstances(req.URL.Hostname(), b)
 		if err != nil {
 			return nil, err
 		}
