@@ -78,8 +78,11 @@ func NewClient(c *ClientConfig) *Client {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
+	// wraps RoundTripper for resolver
+	resolverTransport := &ResolverTransport{RoundTripper: originTransport}
+
 	// wraps RoundTripper for tracer
-	client.transport = &TraceTransport{RoundTripper: originTransport}
+	client.transport = &TraceTransport{RoundTripper: resolverTransport}
 	client.client = &xhttp.Client{
 		Transport: client.transport,
 	}
