@@ -48,7 +48,7 @@ func (t *ResolverTransport) filter(instances []*naming.Instance) (*url.URL, erro
 	}
 
 	if len(urls) == 0 {
-		return nil, errors.New("invalid target urls")
+		return nil, errors.New("invalid target address")
 	}
 
 	return urls[0], nil
@@ -77,10 +77,11 @@ func (t *ResolverTransport) pickNode(appid string, builder naming.Builder) (inst
 	instances = []*naming.Instance{}
 	if _insts, ok := info.Instances[env.Zone]; ok {
 		instances = _insts
-	} else {
-		for _, _insts := range info.Instances {
-			instances = append(instances, _insts...)
-		}
+		return
+	}
+
+	for _, _insts := range info.Instances {
+		instances = append(instances, _insts...)
 	}
 
 	return
@@ -102,8 +103,7 @@ func (t *ResolverTransport) RoundTrip(req *http.Request) (*http.Response, error)
 	*oldURL = *req.URL
 
 	if b, ok := m[req.URL.Scheme]; ok {
-		appid := req.URL.Hostname() // ignore port
-		insts, err := t.pickNode(appid, b)
+		insts, err := t.pickNode(req.URL.Hostname(), b)
 		if err != nil {
 			return nil, err
 		}
