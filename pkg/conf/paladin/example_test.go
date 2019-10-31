@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/paladin"
-
 	"github.com/BurntSushi/toml"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/paladin"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/paladin/apollo"
 )
 
 type exampleConf struct {
@@ -26,7 +26,7 @@ func (e *exampleConf) Set(text string) error {
 	return nil
 }
 
-// ExampleClient is a example client usage.
+// ExampleClient is an example client usage.
 // exmaple.toml:
 /*
 	bool = true
@@ -56,7 +56,41 @@ func ExampleClient() {
 	}()
 }
 
-// ExampleMap is a example map usage.
+// ExampleApolloClient is an example client for apollo driver usage.
+func ExampleApolloClient() {
+	/*
+		pass flags or set envs that apollo needs, for example:
+
+		```
+		export APOLLO_APP_ID=SampleApp
+		export APOLLO_CLUSTER=default
+		export APOLLO_CACHE_DIR=/tmp
+		export APOLLO_META_ADDR=localhost:8080
+		export APOLLO_NAMESPACES=example.yml
+		```
+	*/
+
+	if err := paladin.Init(apollo.PaladinDriverApollo); err != nil {
+		panic(err)
+	}
+	var ec exampleConf
+	// var setter
+	if err := paladin.Watch("example.yml", &ec); err != nil {
+		panic(err)
+	}
+	if err := paladin.Get("example.yml").UnmarshalYAML(&ec); err != nil {
+		panic(err)
+	}
+	// use exampleConf
+	// watch event key
+	go func() {
+		for event := range paladin.WatchEvent(context.TODO(), "key") {
+			fmt.Println(event)
+		}
+	}()
+}
+
+// ExampleMap is an example map usage.
 // exmaple.toml:
 /*
 	bool = true
