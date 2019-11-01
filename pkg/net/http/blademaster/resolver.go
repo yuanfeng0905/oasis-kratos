@@ -76,7 +76,7 @@ func (t *ResolverTransport) pickInstances(appid string, builder naming.Builder) 
 		return
 	}
 
-	// all zones?
+	// all zone?
 	for _, _insts := range info.Instances {
 		instances = append(instances, _insts...)
 	}
