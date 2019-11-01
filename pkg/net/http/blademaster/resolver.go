@@ -37,11 +37,7 @@ func (t *ResolverTransport) filter(instances []*naming.Instance) (*url.URL, erro
 	urls := []*url.URL{}
 	for _, _inst := range instances {
 		for _, addr := range _inst.Addrs {
-			_url, err := url.Parse(addr)
-			if err != nil {
-				continue
-			}
-			if _url.Scheme == "http" || _url.Scheme == "https" {
+			if _url, err := url.Parse(addr); err == nil && (_url.Scheme == "http" || _url.Scheme == "https") {
 				urls = append(urls, _url)
 			}
 		}
