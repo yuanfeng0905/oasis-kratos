@@ -161,9 +161,12 @@ func (client *Client) NewRequest(method, uri, realIP string, params url.Values) 
 	return
 }
 
-func (client *Client) NewJSONRequest(method, uri string, buf []byte) (req *xhttp.Request, err error) {
-	reader := bytes.NewReader(buf)
-	req, err = xhttp.NewRequest(method, uri, reader)
+func (client *Client) NewJSONRequest(method, uri string, params interface{}) (req *xhttp.Request, err error) {
+	buf, err := json.Marshal(params)
+	if err != nil {
+		return
+	}
+	req, err = xhttp.NewRequest(method, uri, bytes.NewReader(buf))
 	if err != nil {
 		return
 	}

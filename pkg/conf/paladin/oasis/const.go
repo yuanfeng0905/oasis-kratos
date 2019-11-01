@@ -2,5 +2,5 @@ package oasis
 
 const (
 	// PaladinDriverOasis ...
-	PaladinDriverApollo = "oasis"
+	PaladinDriverOasis = "oasis"
 )

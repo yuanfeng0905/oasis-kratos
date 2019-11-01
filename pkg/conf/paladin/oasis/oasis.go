@@ -3,36 +3,42 @@ package oasis
 import (
 	"context"
 	"errors"
-	"flag"
 	"log"
-	"os"
-	"strings"
+	"net/url"
 	"sync"
 	"time"
 
-
+	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/env"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/paladin"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/ecode"
+	http "github.com/yuanfeng0905/oasis-kratos/pkg/net/http/blademaster"
+	xtime "github.com/yuanfeng0905/oasis-kratos/pkg/time"
 )
 
 var (
-	_            paladin.Client = &apollo{}
+	_            paladin.Client = &oasis{}
 	defaultValue                = ""
 )
 
-type apolloWatcher struct {
-	keys []string // in apollo, they're called namespaces
+type Diff struct {
+	Version int    `json:"version"`
+	Name    string `json:"name"`
+}
+
+type oasisWatcher struct {
+	keys []string
 	C    chan paladin.Event
 }
 
-func newApolloWatcher(keys []string) *apolloWatcher {
-	return &apolloWatcher{keys: keys, C: make(chan paladin.Event, 5)}
+func newOasisWatcher(keys []string) *oasisWatcher {
+	return &oasisWatcher{keys: keys, C: make(chan paladin.Event, 5)}
 }
 
-func (aw *apolloWatcher) HasKey(key string) bool {
-	if len(aw.keys) == 0 {
+func (ow *oasisWatcher) HasKey(key string) bool {
+	if len(ow.keys) == 0 {
 		return true
 	}
-	for _, k := range aw.keys {
+	for _, k := range ow.keys {
 		if k == key {
 			return true
 		}
@@ -40,138 +46,83 @@ func (aw *apolloWatcher) HasKey(key string) bool {
 	return false
 }
 
-func (aw *apolloWatcher) Handle(event paladin.Event) {
+func (ow *oasisWatcher) Handle(event paladin.Event) {
 	select {
-	case aw.C <- event:
+	case ow.C <- event:
 	default:
 		log.Printf("paladin: event channel full discard ns %s update event", event.Key)
 	}
 }
 
-// apollo is apollo config client.
-type apollo struct {
-	client   *agollo.Client
-	values   *paladin.Map
-	wmu      sync.RWMutex
-	watchers map[*apolloWatcher]struct{}
+type oasis struct {
+	client    *http.Client
+	values    *paladin.Map
+	wmu       sync.RWMutex
+	watchers  map[*oasisWatcher]struct{}
+	nLock     sync.RWMutex
+	namesRepo map[string]*Diff
 }
 
-// Config is apollo config client config.
 type Config struct {
-	AppID      string   `json:"app_id"`
-	Cluster    string   `json:"cluster"`
-	CacheDir   string   `json:"cache_dir"`
-	MetaAddr   string   `json:"meta_addr"`
-	Namespaces []string `json:"namespaces"`
+	AppID    string `json:"app_id"`
+	Env      string `json:"env"`
+	Zone     string `json:"zone"`
+	CacheDir string `json:"cache_dir`
+	//Names    []string `json:"names"` // 监听的配置文件名
 }
 
-type apolloDriver struct{}
+type oasisDriver struct{}
 
 var (
 	confAppID, confCluster, confCacheDir, confMetaAddr, confNamespaces string
 )
 
 func init() {
-	addApolloFlags()
-	paladin.Register(PaladinDriverApollo, &apolloDriver{})
+	paladin.Register(PaladinDriverOasis, &oasisDriver{})
 }
 
-func addApolloFlags() {
-	flag.StringVar(&confAppID, "apollo.appid", "", "apollo app id")
-	flag.StringVar(&confCluster, "apollo.cluster", "", "apollo cluster")
-	flag.StringVar(&confCacheDir, "apollo.cachedir", "/tmp", "apollo cache dir")
-	flag.StringVar(&confMetaAddr, "apollo.metaaddr", "", "apollo meta server addr, e.g. localhost:8080")
-	flag.StringVar(&confNamespaces, "apollo.namespaces", "", "subscribed apollo namespaces, comma separated, e.g. app.yml,mysql.yml")
-}
-
-func buildConfigForApollo() (c *Config, err error) {
-	if appidFromEnv := os.Getenv("APOLLO_APP_ID"); appidFromEnv != "" {
-		confAppID = appidFromEnv
-	}
-	if confAppID == "" {
-		err = errors.New("invalid apollo appid, pass it via APOLLO_APP_ID=xxx with env or --apollo.appid=xxx with flag")
-		return
-	}
-	if clusterFromEnv := os.Getenv("APOLLO_CLUSTER"); clusterFromEnv != "" {
-		confCluster = clusterFromEnv
-	}
-	if confAppID == "" {
-		err = errors.New("invalid apollo cluster, pass it via APOLLO_CLUSTER=xxx with env or --apollo.cluster=xxx with flag")
-		return
-	}
-	if cacheDirFromEnv := os.Getenv("APOLLO_CACHE_DIR"); cacheDirFromEnv != "" {
-		confCacheDir = cacheDirFromEnv
-	}
-	if metaAddrFromEnv := os.Getenv("APOLLO_META_ADDR"); metaAddrFromEnv != "" {
-		confMetaAddr = metaAddrFromEnv
-	}
-	if confMetaAddr == "" {
-		err = errors.New("invalid apollo meta addr, pass it via APOLLO_META_ADDR=xxx with env or --apollo.metaaddr=xxx with flag")
-		return
-	}
-	if namespacesFromEnv := os.Getenv("APOLLO_NAMESPACES"); namespacesFromEnv != "" {
-		confNamespaces = namespacesFromEnv
-	}
-	namespaceNames := strings.Split(confNamespaces, ",")
-	if len(namespaceNames) == 0 {
-		err = errors.New("invalid apollo namespaces, pass it via APOLLO_NAMESPACES=xxx with env or --apollo.namespaces=xxx with flag")
-		return
-	}
+func buildConfigForOasis() (c *Config, err error) {
 	c = &Config{
-		AppID:      confAppID,
-		Cluster:    confCluster,
-		CacheDir:   confCacheDir,
-		MetaAddr:   confMetaAddr,
-		Namespaces: namespaceNames,
+		AppID:    env.AppID,
+		Env:      env.DeployEnv,
+		Zone:     env.Zone,
+		CacheDir: confCacheDir,
 	}
 	return
 }
 
-// New new an apollo config client.
-// it watches apollo namespaces changes and updates local cache.
-// BTW, in our context, namespaces in apollo means keys in paladin.
-func (ad *apolloDriver) New() (paladin.Client, error) {
-	c, err := buildConfigForApollo()
+// New new an oasis config client.
+func (ad *oasisDriver) New() (paladin.Client, error) {
+	c, err := buildConfigForOasis()
 	if err != nil {
 		return nil, err
 	}
 	return ad.new(c)
 }
 
-func (ad *apolloDriver) new(conf *Config) (paladin.Client, error) {
+func (ad *oasisDriver) new(conf *Config) (paladin.Client, error) {
 	if conf == nil {
-		err := errors.New("invalid apollo conf")
+		err := errors.New("invalid oasis conf")
 		return nil, err
 	}
-	client := agollo.NewClient(&agollo.Conf{
-		AppID:          conf.AppID,
-		Cluster:        conf.Cluster,
-		NameSpaceNames: conf.Namespaces, // these namespaces will be subscribed at init
-		CacheDir:       conf.CacheDir,
-		IP:             conf.MetaAddr,
-	})
-	err := client.Start()
-	if err != nil {
-		return nil, err
+	a := &oasis{
+		client: http.NewClient(&http.ClientConfig{
+			Dial:      xtime.Duration(3 * time.Second),
+			Timeout:   xtime.Duration(40 * time.Second),
+			KeepAlive: xtime.Duration(40 * time.Second),
+		}),
+		values:    new(paladin.Map),
+		watchers:  make(map[*oasisWatcher]struct{}),
+		namesRepo: make(map[string]*Diff),
 	}
-	a := &apollo{
-		client:   client,
-		values:   new(paladin.Map),
-		watchers: make(map[*apolloWatcher]struct{}),
-	}
-	raws, err := a.loadValues(conf.Namespaces)
-	if err != nil {
-		return nil, err
-	}
-	a.values.Store(raws)
-	// watch namespaces by default.
-	a.WatchEvent(context.TODO(), conf.Namespaces...)
-	go a.watchproc(conf.Namespaces)
+
+	go a.watchproc()
+
 	return a, nil
 }
 
-// loadValues load values from apollo namespaces to values
-func (a *apollo) loadValues(keys []string) (values map[string]*paladin.Value, err error) {
+// loadValues
+func (a *oasis) loadValues(keys []string) (values map[string]*paladin.Value, err error) {
 	values = make(map[string]*paladin.Value, len(keys))
 	for _, k := range keys {
 		if values[k], err = a.loadValue(k); err != nil {
@@ -181,17 +132,46 @@ func (a *apollo) loadValues(keys []string) (values map[string]*paladin.Value, er
 	return
 }
 
-// loadValue load value from apollo namespace content to value
-func (a *apollo) loadValue(key string) (*paladin.Value, error) {
-	content := a.client.GetNameSpaceContent(key, defaultValue)
-	return paladin.NewValue(content, content), nil
+// loadValue
+func (a *oasis) loadValue(key string) (*paladin.Value, error) {
+	params := url.Values{}
+	params.Set("app_id", env.AppID)
+	params.Set("name", key)
+	params.Set("env", env.DeployEnv)
+	params.Set("zone", env.Zone)
+	params.Set("ip", "")
+
+	var resp struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+		Data    struct {
+			Version int    `json:"version"`
+			Content string `json:"content"`
+			MD5     string `json:"md5"`
+		} `json:"data"`
+	}
+	if err := a.client.Get(context.Background(),
+		"discovery://infra.config/api/config/fetch", "", params, &resp); err != nil {
+		return nil, err
+	}
+
+	a.nLock.Lock()
+	if _, ok := a.namesRepo[key]; ok {
+		a.namesRepo[key].Version = resp.Data.Version // update version for listener
+	}
+	a.nLock.Unlock()
+
+	// update local memory
+	value := paladin.NewValue(resp.Data.Content, resp.Data.Content)
+	raws := a.values.Load()
+	raws[key] = value
+	a.values.Store(raws)
+
+	return value, nil
 }
 
 // reloadValue reload value by key and send event
-func (a *apollo) reloadValue(key string) (err error) {
-	// NOTE: in some case immediately read content from client after receive event
-	// will get old content due to cache, sleep 100ms make sure get correct content.
-	time.Sleep(100 * time.Millisecond)
+func (a *oasis) reloadValue(key string) (err error) {
 	var (
 		value    *paladin.Value
 		rawValue string
@@ -204,9 +184,7 @@ func (a *apollo) reloadValue(key string) (err error) {
 	if err != nil {
 		return
 	}
-	raws := a.values.Load()
-	raws[key] = value
-	a.values.Store(raws)
+
 	a.wmu.RLock()
 	n := 0
 	for w := range a.watchers {
@@ -221,37 +199,110 @@ func (a *apollo) reloadValue(key string) (err error) {
 	return
 }
 
-// apollo config daemon to watch remote apollo notifications
-func (a *apollo) watchproc(keys []string) {
-	events := a.client.WatchUpdate()
+func (a *oasis) watchUpdate() ([]*Diff, error) {
+	var params struct {
+		AppID string  `json:"app_id"`
+		Env   string  `json:"env"`
+		Zone  string  `json:"zone"`
+		IP    string  `json:"ip"`
+		Items []*Diff `json:"items"` //关注的配置项
+	}
+
+	a.nLock.RLock()
+	for _, item := range a.namesRepo {
+		params.Items = append(params.Items, item)
+	}
+	a.nLock.RUnlock()
+
+	req, err := a.client.NewJSONRequest("POST", "discovery://infra.config/api/config/listeners", params)
+	if err != nil {
+		log.Printf("paladin: create request error: %s", err)
+		return nil, err
+	}
+
+	var resp struct {
+		Code    int     `json:"code"`
+		Message string  `json:"message"`
+		Data    []*Diff `json:"data"`
+	}
+	if err := a.client.JSON(context.Background(), req, &resp); err != nil {
+		log.Printf("paladin: create listener error: %s", err)
+		return nil, err
+	}
+
+	// not modify
+	if resp.Code == ecode.NotModified.Code() {
+		return nil, nil
+	}
+
+	// update
+	if resp.Code == 0 {
+		return resp.Data, nil
+	}
+
+	return nil, errors.New(resp.Message)
+}
+
+// oasis config daemon to watch remote oasis notifications
+func (a *oasis) watchproc() {
 	for {
-		select {
-		case event := <-events:
-			if err := a.reloadValue(event.Namespace); err != nil {
-				log.Printf("paladin: load key: %s error: %s, skipped", event.Namespace, err)
+		if len(a.namesRepo) == 0 {
+			time.Sleep(100 * time.Millisecond)
+			continue
+		}
+
+		diffs, err := a.watchUpdate()
+		if err != nil {
+			log.Printf("paladin: watchUpdate error: %s", err)
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		if diffs != nil {
+			for _, diff := range diffs {
+				a.reloadValue(diff.Name)
 			}
 		}
 	}
 }
 
 // Get return value by key.
-func (a *apollo) Get(key string) *paladin.Value {
+func (a *oasis) Get(key string) *paladin.Value {
+	// 第一次加载，尝试从远程获取
+	// TODO 这里并发会出现多次请求，待优化
+	if _, err := a.values.Get(key).Raw(); err == paladin.ErrNotExist {
+		val, err := a.loadValue(key)
+		if err != nil {
+			log.Printf("pladin: loadValue error: %s", err)
+			return val
+		}
+		// 本地主动订阅
+		a.subscribeNames(key)
+	}
+
 	return a.values.Get(key)
 }
 
 // GetAll return value map.
-func (a *apollo) GetAll() *paladin.Map {
+func (a *oasis) GetAll() *paladin.Map {
 	return a.values
 }
 
-// WatchEvent watch with the specified keys.
-func (a *apollo) WatchEvent(ctx context.Context, keys ...string) <-chan paladin.Event {
-	aw := newApolloWatcher(keys)
-	err := a.client.SubscribeToNamespaces(keys...)
-	if err != nil {
-		log.Printf("subscribe namespaces %v failed, %v", keys, err)
-		return aw.C
+func (a *oasis) subscribeNames(keys ...string) {
+	a.nLock.Lock()
+	for _, key := range keys {
+		if _, ok := a.namesRepo[key]; !ok {
+			a.namesRepo[key] = &Diff{Name: key, Version: -1} // default version = -1
+		}
 	}
+	a.nLock.Unlock()
+}
+
+// WatchEvent watch with the specified keys.
+func (a *oasis) WatchEvent(ctx context.Context, keys ...string) <-chan paladin.Event {
+	aw := newOasisWatcher(keys)
+	a.subscribeNames(keys...)
+
 	a.wmu.Lock()
 	a.watchers[aw] = struct{}{}
 	a.wmu.Unlock()
@@ -259,10 +310,7 @@ func (a *apollo) WatchEvent(ctx context.Context, keys ...string) <-chan paladin.
 }
 
 // Close close watcher.
-func (a *apollo) Close() (err error) {
-	if err = a.client.Stop(); err != nil {
-		return
-	}
+func (a *oasis) Close() (err error) {
 	a.wmu.RLock()
 	for w := range a.watchers {
 		close(w.C)
