@@ -2,13 +2,12 @@ package oasis
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/paladin/oasis/internal/mockserver"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/naming/discovery"
+	bm "github.com/yuanfeng0905/oasis-kratos/pkg/net/http/blademaster"
 )
 
 func TestMain(m *testing.M) {
@@ -19,38 +18,51 @@ func TestMain(m *testing.M) {
 }
 
 func setup() {
-	go func() {
-		if err := mockserver.Run(); err != nil {
-			log.Fatal(err)
-		}
-	}()
-	// wait for mock server to run
-	time.Sleep(time.Millisecond * 500)
+
+	// go func() {
+	// 	if err := mockserver.Run(); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// }()
+	// // wait for mock server to run
+	// time.Sleep(time.Millisecond * 500)
 }
 
 func teardown() {
-	mockserver.Close()
+	//mockserver.Close()
 }
 
-func TestApollo(t *testing.T) {
+func TestOasis(t *testing.T) {
 	var (
 		testAppYAML           = "app.yml"
-		testAppYAMLContent1   = "test: test12234\ntest2: test333"
+		testAppYAMLContent1   = "test: 123"
 		testAppYAMLContent2   = "test: 1111"
 		testClientJSON        = "client.json"
 		testClientJSONContent = `{"name":"agollo"}`
 	)
-	os.Setenv("APOLLO_APP_ID", "SampleApp")
-	os.Setenv("APOLLO_CLUSTER", "default")
-	os.Setenv("APOLLO_CACHE_DIR", "/tmp")
-	os.Setenv("APOLLO_META_ADDR", "localhost:8080")
-	os.Setenv("APOLLO_NAMESPACES", fmt.Sprintf("%s,%s", testAppYAML, testClientJSON))
-	mockserver.Set(testAppYAML, "content", testAppYAMLContent1)
-	mockserver.Set(testClientJSON, "content", testClientJSONContent)
-	ad := &apolloDriver{}
+
+	os.Setenv("APP_ID", "wx01")
+	os.Setenv("ZONE", "hk01")
+	os.Setenv("DEPLOY_ENV", "dev")
+
+	// 注册服务发现
+	/*
+		Nodes  []string
+		Region string
+		Zone   string
+		Env    string
+		Host   string
+	*/
+	bm.Register(discovery.New(&discovery.Config{
+		Nodes: []string{"127.0.0.1:7171"},
+		Zone:  os.Getenv("ZONE"),
+		Env:   os.Getenv("DEPLOY_ENV"),
+	}))
+
+	ad := &oasisDriver{}
 	apollo, err := ad.New()
 	if err != nil {
-		t.Fatalf("new apollo error, %v", err)
+		t.Fatalf("new oasis error, %v", err)
 	}
 	value := apollo.Get(testAppYAML)
 	if content, _ := value.String(); content != testAppYAMLContent1 {
@@ -60,7 +72,7 @@ func TestApollo(t *testing.T) {
 	if content, _ := value.String(); content != testClientJSONContent {
 		t.Fatalf("got app.yml unexpected value %s", content)
 	}
-	mockserver.Set(testAppYAML, "content", testAppYAMLContent2)
+
 	updates := apollo.WatchEvent(context.TODO(), testAppYAML)
 	select {
 	case <-updates:

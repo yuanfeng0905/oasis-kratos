@@ -97,6 +97,7 @@ func (engine *Engine) Start() error {
 
 	log.Info("blademaster: start http listen addr: %s", conf.Addr)
 	server := &http.Server{
+		Addr:         conf.Addr,
 		ReadTimeout:  time.Duration(conf.ReadTimeout),
 		WriteTimeout: time.Duration(conf.WriteTimeout),
 	}

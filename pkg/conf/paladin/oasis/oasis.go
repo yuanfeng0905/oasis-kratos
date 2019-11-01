@@ -16,8 +16,7 @@ import (
 )
 
 var (
-	_            paladin.Client = &oasis{}
-	defaultValue                = ""
+	_ paladin.Client = &oasis{}
 )
 
 type Diff struct {
@@ -67,15 +66,11 @@ type Config struct {
 	AppID    string `json:"app_id"`
 	Env      string `json:"env"`
 	Zone     string `json:"zone"`
-	CacheDir string `json:"cache_dir`
+	CacheDir string `json:"cache_dir"`
 	//Names    []string `json:"names"` // 监听的配置文件名
 }
 
 type oasisDriver struct{}
-
-var (
-	confAppID, confCluster, confCacheDir, confMetaAddr, confNamespaces string
-)
 
 func init() {
 	paladin.Register(PaladinDriverOasis, &oasisDriver{})
@@ -86,7 +81,7 @@ func buildConfigForOasis() (c *Config, err error) {
 		AppID:    env.AppID,
 		Env:      env.DeployEnv,
 		Zone:     env.Zone,
-		CacheDir: confCacheDir,
+		CacheDir: "./",
 	}
 	return
 }
@@ -115,6 +110,7 @@ func (ad *oasisDriver) new(conf *Config) (paladin.Client, error) {
 		watchers:  make(map[*oasisWatcher]struct{}),
 		namesRepo: make(map[string]*Diff),
 	}
+	a.values.Store(make(map[string]*paladin.Value))
 
 	go a.watchproc()
 
@@ -270,7 +266,7 @@ func (a *oasis) watchproc() {
 func (a *oasis) Get(key string) *paladin.Value {
 	// 第一次加载，尝试从远程获取
 	// TODO 这里并发会出现多次请求，待优化
-	if _, err := a.values.Get(key).Raw(); err == paladin.ErrNotExist {
+	if _, err := a.values.Get(key).Raw(); err != nil {
 		val, err := a.loadValue(key)
 		if err != nil {
 			log.Printf("pladin: loadValue error: %s", err)
