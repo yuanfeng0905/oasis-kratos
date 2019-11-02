@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/url"
+	"os"
 	"sync"
 	"time"
 
@@ -54,12 +55,13 @@ func (ow *oasisWatcher) Handle(event paladin.Event) {
 }
 
 type oasis struct {
+	config    *Config
 	client    *http.Client
 	values    *paladin.Map
 	wmu       sync.RWMutex
 	watchers  map[*oasisWatcher]struct{}
 	nLock     sync.RWMutex
-	namesRepo map[string]*Diff
+	namesRepo map[string]int
 }
 
 type Config struct {
@@ -78,11 +80,21 @@ func init() {
 
 func buildConfigForOasis() (c *Config, err error) {
 	c = &Config{
-		AppID:    env.AppID,
-		Env:      env.DeployEnv,
-		Zone:     env.Zone,
+		AppID:    os.Getenv("APP_ID"),
+		Env:      os.Getenv("DEPLOY_ENV"),
+		Zone:     os.Getenv("ZONE"),
 		CacheDir: "./",
 	}
+	if c.AppID == "" {
+		c.AppID = env.AppID
+	}
+	if c.Env == "" {
+		c.Env = env.DeployEnv
+	}
+	if c.Zone == "" {
+		c.Zone = env.Zone
+	}
+
 	return
 }
 
@@ -101,6 +113,7 @@ func (ad *oasisDriver) new(conf *Config) (paladin.Client, error) {
 		return nil, err
 	}
 	a := &oasis{
+		config: conf,
 		client: http.NewClient(&http.ClientConfig{
 			Dial:      xtime.Duration(3 * time.Second),
 			Timeout:   xtime.Duration(40 * time.Second),
@@ -108,7 +121,7 @@ func (ad *oasisDriver) new(conf *Config) (paladin.Client, error) {
 		}),
 		values:    new(paladin.Map),
 		watchers:  make(map[*oasisWatcher]struct{}),
-		namesRepo: make(map[string]*Diff),
+		namesRepo: make(map[string]int),
 	}
 	a.values.Store(make(map[string]*paladin.Value))
 
@@ -118,24 +131,23 @@ func (ad *oasisDriver) new(conf *Config) (paladin.Client, error) {
 }
 
 // loadValues
-func (a *oasis) loadValues(keys []string) (values map[string]*paladin.Value, err error) {
-	values = make(map[string]*paladin.Value, len(keys))
-	for _, k := range keys {
-		if values[k], err = a.loadValue(k); err != nil {
-			return
-		}
-	}
-	return
-}
+// func (a *oasis) loadValues(keys []string) (values map[string]*paladin.Value, err error) {
+// 	values = make(map[string]*paladin.Value, len(keys))
+// 	for _, k := range keys {
+// 		if values[k], err = a.loadValue(k); err != nil {
+// 			return
+// 		}
+// 	}
+// 	return
+// }
 
 // loadValue
 func (a *oasis) loadValue(key string) (*paladin.Value, error) {
 	params := url.Values{}
-	params.Set("app_id", env.AppID)
+	params.Set("app_id", a.config.AppID)
+	params.Set("env", a.config.Env)
+	params.Set("zone", a.config.Zone)
 	params.Set("name", key)
-	params.Set("env", env.DeployEnv)
-	params.Set("zone", env.Zone)
-	params.Set("ip", "")
 
 	var resp struct {
 		Code    int    `json:"code"`
@@ -147,15 +159,12 @@ func (a *oasis) loadValue(key string) (*paladin.Value, error) {
 		} `json:"data"`
 	}
 	if err := a.client.Get(context.Background(),
-		"discovery://infra.config/api/config/fetch", "", params, &resp); err != nil {
+		"discovery://infra.config/api/v1/config/fetch", "", params, &resp); err != nil {
 		return nil, err
 	}
 
-	a.nLock.Lock()
-	if _, ok := a.namesRepo[key]; ok {
-		a.namesRepo[key].Version = resp.Data.Version // update version for listener
-	}
-	a.nLock.Unlock()
+	// update names repo
+	a.updateNamesRepo(key, resp.Data.Version)
 
 	// update local memory
 	value := paladin.NewValue(resp.Data.Content, resp.Data.Content)
@@ -203,14 +212,17 @@ func (a *oasis) watchUpdate() ([]*Diff, error) {
 		IP    string  `json:"ip"`
 		Items []*Diff `json:"items"` //关注的配置项
 	}
+	params.AppID = a.config.AppID
+	params.Env = a.config.Env
+	params.Zone = a.config.Zone
 
 	a.nLock.RLock()
-	for _, item := range a.namesRepo {
-		params.Items = append(params.Items, item)
+	for name, version := range a.namesRepo {
+		params.Items = append(params.Items, &Diff{Name: name, Version: version})
 	}
 	a.nLock.RUnlock()
 
-	req, err := a.client.NewJSONRequest("POST", "discovery://infra.config/api/config/listeners", params)
+	req, err := a.client.NewJSONRequest("POST", "discovery://infra.config/api/v1/config/listeners", params)
 	if err != nil {
 		log.Printf("paladin: create request error: %s", err)
 		return nil, err
@@ -254,9 +266,9 @@ func (a *oasis) watchproc() {
 			continue
 		}
 
-		if diffs != nil {
-			for _, diff := range diffs {
-				a.reloadValue(diff.Name)
+		for _, diff := range diffs {
+			if err := a.reloadValue(diff.Name); err != nil {
+				log.Printf("paladin: reloadValue error: %s", err)
 			}
 		}
 	}
@@ -272,8 +284,6 @@ func (a *oasis) Get(key string) *paladin.Value {
 			log.Printf("pladin: loadValue error: %s", err)
 			return val
 		}
-		// 本地主动订阅
-		a.subscribeNames(key)
 	}
 
 	return a.values.Get(key)
@@ -284,11 +294,13 @@ func (a *oasis) GetAll() *paladin.Map {
 	return a.values
 }
 
-func (a *oasis) subscribeNames(keys ...string) {
+func (a *oasis) updateNamesRepo(name string, version int) {
 	a.nLock.Lock()
-	for _, key := range keys {
-		if _, ok := a.namesRepo[key]; !ok {
-			a.namesRepo[key] = &Diff{Name: key, Version: -1} // default version = -1
+	if _, ok := a.namesRepo[name]; !ok {
+		a.namesRepo[name] = version // default version = -1
+	} else {
+		if version > a.namesRepo[name] {
+			a.namesRepo[name] = version
 		}
 	}
 	a.nLock.Unlock()
@@ -297,7 +309,10 @@ func (a *oasis) subscribeNames(keys ...string) {
 // WatchEvent watch with the specified keys.
 func (a *oasis) WatchEvent(ctx context.Context, keys ...string) <-chan paladin.Event {
 	aw := newOasisWatcher(keys)
-	a.subscribeNames(keys...)
+
+	for _, key := range keys {
+		a.updateNamesRepo(key, -1)
+	}
 
 	a.wmu.Lock()
 	a.watchers[aw] = struct{}{}

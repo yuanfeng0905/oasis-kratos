@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
-	"time"
 
 	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/env"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/naming"
@@ -54,13 +53,9 @@ func (t *ResolverTransport) pickInstances(appid string, builder naming.Builder) 
 	resolver := builder.Build(appid)
 
 	ev := resolver.Watch()
-	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*100)
-	defer cancel()
-
-	select {
-	case <-ev:
-	case <-ctx.Done():
-		err = errors.New("fetch node timeout")
+	_, ok := <-ev
+	if !ok {
+		err = errors.New("discovery watch failed")
 		return
 	}
 
@@ -95,11 +90,11 @@ func (t *ResolverTransport) RoundTrip(req *http.Request) (*http.Response, error)
 		return rt.RoundTrip(req)
 	}
 
-	// url format: discovery://appid/xxxx
-	oldURL := new(url.URL)
-	*oldURL = *req.URL
-
 	if b, ok := m[req.URL.Scheme]; ok {
+		// url format: discovery://appid/xxxx
+		newReq := new(http.Request)
+		*newReq = *req
+
 		insts, err := t.pickInstances(req.URL.Hostname(), b)
 		if err != nil {
 			return nil, err
@@ -110,12 +105,19 @@ func (t *ResolverTransport) RoundTrip(req *http.Request) (*http.Response, error)
 			return nil, err
 		}
 
-		req.URL.Scheme = _url.Scheme
-		req.URL.Host = _url.Host
+		newReq.Host = _url.Host
+		newReq.URL.Scheme = _url.Scheme
+		newReq.URL.Host = _url.Host
+
+		resp, err := rt.RoundTrip(newReq)
+
+		resp.Request.Host = req.Host
+		resp.Request.URL.Scheme = req.URL.Scheme
+		resp.Request.URL.Host = req.URL.Host
+
+		return resp, err
 	}
 
 	resp, err := rt.RoundTrip(req)
-	resp.Request.URL = oldURL // restore
-
 	return resp, err
 }
