@@ -222,9 +222,12 @@ func (a *oasis) watchUpdate() ([]*Diff, error) {
 	}
 	a.nLock.RUnlock()
 
+	if len(params.Items) == 0 {
+		return nil, errors.New("name repo is empty, wait retry...")
+	}
+
 	req, err := a.client.NewJSONRequest("POST", "discovery://infra.config/api/v1/config/listeners", params)
 	if err != nil {
-		log.Printf("paladin: create request error: %s", err)
 		return nil, err
 	}
 
@@ -234,7 +237,6 @@ func (a *oasis) watchUpdate() ([]*Diff, error) {
 		Data    []*Diff `json:"data"`
 	}
 	if err := a.client.JSON(context.Background(), req, &resp); err != nil {
-		log.Printf("paladin: create listener error: %s", err)
 		return nil, err
 	}
 
@@ -254,11 +256,6 @@ func (a *oasis) watchUpdate() ([]*Diff, error) {
 // oasis config daemon to watch remote oasis notifications
 func (a *oasis) watchproc() {
 	for {
-		if len(a.namesRepo) == 0 {
-			time.Sleep(100 * time.Millisecond)
-			continue
-		}
-
 		diffs, err := a.watchUpdate()
 		if err != nil {
 			log.Printf("paladin: watchUpdate error: %s", err)
