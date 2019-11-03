@@ -110,7 +110,7 @@ func (t *ResolverTransport) RoundTrip(req *http.Request) (*http.Response, error)
 		newReq.URL.Host = _url.Host
 
 		resp, err := rt.RoundTrip(newReq)
-		if err != nil {
+		if err != nil && resp != nil {
 			resp.Request.Host = req.Host
 			resp.Request.URL.Scheme = req.URL.Scheme
 			resp.Request.URL.Host = req.URL.Host
