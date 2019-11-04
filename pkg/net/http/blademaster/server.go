@@ -123,7 +123,6 @@ func (engine *Engine) Start() error {
 }
 
 func (engine *Engine) registerSelf() (err error) {
-
 	dis := discovery.New(nil)
 	inst := &naming.Instance{
 		Zone:     env.Zone,
