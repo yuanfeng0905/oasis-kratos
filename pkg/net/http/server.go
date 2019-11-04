@@ -13,6 +13,10 @@ import (
 	"github.com/yuanfeng0905/oasis-kratos/pkg/naming/discovery"
 )
 
+type ServerConfig struct {
+	bm.ServerConfig
+}
+
 type Server struct {
 	engine *bm.Engine
 	// discovery cannelFunc
@@ -20,8 +24,14 @@ type Server struct {
 }
 
 // DefaultServer returns an Engine instance with the Recovery and Logger middleware already attached.
-func DefaultServer(conf *bm.ServerConfig) *Server {
-	engine := bm.NewServer(conf)
+func DefaultServer(conf *ServerConfig) *Server {
+	engine := bm.NewServer(&bm.ServerConfig{
+		Network:      conf.Network,
+		Addr:         conf.Addr,
+		Timeout:      conf.Timeout,
+		ReadTimeout:  conf.ReadTimeout,
+		WriteTimeout: conf.WriteTimeout,
+	})
 	engine.Use(bm.Recovery(), bm.Trace(), bm.Logger())
 	return &Server{engine: engine}
 }
