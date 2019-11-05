@@ -1,4 +1,4 @@
-package blademaster
+package resolver
 
 import (
 	"context"
@@ -22,7 +22,7 @@ type ResolverTransport struct {
 	http.RoundTripper
 }
 
-// Register
+// Register resolver
 func Register(b naming.Builder) {
 	m[b.Scheme()] = b
 }

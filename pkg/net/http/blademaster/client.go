@@ -20,7 +20,7 @@ import (
 	"github.com/gogo/protobuf/proto"
 	pkgerr "github.com/pkg/errors"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/env"
-	"github.com/yuanfeng0905/oasis-kratos/pkg/naming/discovery"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/net/http/blademaster/resolver"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/net/metadata"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/net/netutil/breaker"
 	xtime "github.com/yuanfeng0905/oasis-kratos/pkg/time"
@@ -39,9 +39,6 @@ func init() {
 	if err == nil {
 		_noKickUserAgent = _noKickUserAgent + runtime.Version() + " " + n
 	}
-
-	// default register discover resolver
-	Register(discovery.Builder())
 }
 
 // ClientConfig is http client conf.
@@ -82,7 +79,7 @@ func NewClient(c *ClientConfig) *Client {
 	}
 
 	// wraps RoundTripper for resolver
-	resolverTransport := &ResolverTransport{RoundTripper: originTransport}
+	resolverTransport := &resolver.ResolverTransport{RoundTripper: originTransport}
 
 	// wraps RoundTripper for tracer
 	client.transport = &TraceTransport{RoundTripper: resolverTransport}
