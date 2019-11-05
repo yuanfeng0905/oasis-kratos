@@ -14,10 +14,7 @@ import (
 	"time"
 
 	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/dsn"
-	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/env"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/log"
-	"github.com/yuanfeng0905/oasis-kratos/pkg/naming"
-	"github.com/yuanfeng0905/oasis-kratos/pkg/naming/discovery"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/net/criticality"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/net/ip"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/net/metadata"
@@ -112,11 +109,6 @@ func (engine *Engine) Start() error {
 			}
 			panic(errors.Wrapf(err, "blademaster: engine.ListenServer(%+v, %+v)", server, l))
 		}
-
-		// register discovery
-		if err := engine.registerSelf(); err != nil {
-			panic(errors.Wrapf(err, "blademaster: engine.registerSelf error: %v", err))
-		}
 	}()
 
 	return nil
@@ -161,9 +153,6 @@ type Engine struct {
 	allNoMethod []HandlerFunc
 	noRoute     []HandlerFunc
 	noMethod    []HandlerFunc
-
-	// discovery cancel
-	discoveryCancel context.CancelFunc
 }
 
 type injection struct {
@@ -209,27 +198,6 @@ func NewServer(conf *ServerConfig) *Engine {
 	})
 	startPerf(engine)
 	return engine
-}
-
-func (engine *Engine) registerSelf() (err error) {
-	if env.DiscoveryNodes == "" {
-		log.Info(`blademaster: discovery not be enabled. params "-discovery.nodes" or env(DISCOVERY_NODES) not set.`)
-		return nil
-	}
-
-	dis := discovery.New(nil)
-	inst := &naming.Instance{
-		Zone:     env.Zone,
-		Env:      env.DeployEnv,
-		AppID:    env.AppID,
-		Hostname: env.Hostname,
-		Addrs: []string{
-			"http://" + engine.Server().Addr, // default scheme only support HTTP
-		},
-	}
-	engine.discoveryCancel, err = dis.Register(context.Background(), inst)
-
-	return
 }
 
 // SetMethodConfig is used to set config on specified path
@@ -398,8 +366,6 @@ func (engine *Engine) Shutdown(ctx context.Context) error {
 	if server == nil {
 		return errors.New("blademaster: no server")
 	}
-	// cancel discovery
-	engine.discoveryCancel()
 
 	return errors.WithStack(server.Shutdown(ctx))
 }
