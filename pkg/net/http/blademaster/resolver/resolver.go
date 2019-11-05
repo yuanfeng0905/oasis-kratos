@@ -8,6 +8,9 @@ import (
 
 	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/env"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/naming"
+
+	// default import
+	_ "github.com/yuanfeng0905/oasis-kratos/pkg/net/http/blademaster/resolver/discovery"
 )
 
 var (
