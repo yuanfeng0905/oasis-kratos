@@ -17,13 +17,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gogo/protobuf/proto"
+	pkgerr "github.com/pkg/errors"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/conf/env"
+	"github.com/yuanfeng0905/oasis-kratos/pkg/naming/discovery"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/net/metadata"
 	"github.com/yuanfeng0905/oasis-kratos/pkg/net/netutil/breaker"
 	xtime "github.com/yuanfeng0905/oasis-kratos/pkg/time"
-
-	"github.com/gogo/protobuf/proto"
-	pkgerr "github.com/pkg/errors"
 )
 
 const (
@@ -39,6 +39,9 @@ func init() {
 	if err == nil {
 		_noKickUserAgent = _noKickUserAgent + runtime.Version() + " " + n
 	}
+
+	// default register discover resolver
+	Register(discovery.Builder())
 }
 
 // ClientConfig is http client conf.
