@@ -59,7 +59,7 @@ var toolIndexs = []*Tool{
 	{
 		Name:         "genproject",
 		Alias:        "kratos-gen-project",
-		Install:      "go get -u github.com/bilibili/kratos/tool/kratos-gen-project",
+		Install:      "go get -u github.com/yuanfeng0905/oasis-kratos/tool/kratos-gen-project",
 		BuildTime:    time.Date(2019, 11, 3, 0, 0, 0, 0, time.Local),
 		Platform:     []string{"darwin", "linux", "windows"},
 		Hidden:       true,
@@ -69,7 +69,7 @@ var toolIndexs = []*Tool{
 		Name:      "testcli",
 		Alias:     "testcli",
 		BuildTime: time.Date(2019, 9, 9, 0, 0, 0, 0, time.Local),
-		Install:   "go get -u github.com/bilibili/kratos/tool/testcli",
+		Install:   "go get -u github.com/yuanfeng0905/oasis-kratos/tool/testcli",
 		Summary:   "测试代码生成",
 		Platform:  []string{"darwin", "linux", "windows"},
 		Author:    "kratos",
