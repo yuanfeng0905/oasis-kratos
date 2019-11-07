@@ -8,6 +8,8 @@ require (
 	github.com/dgryski/go-farm v0.0.0-20190423205320-6a90982ecee2
 	github.com/fatih/color v1.7.0
 	github.com/fsnotify/fsnotify v1.4.7
+	github.com/go-playground/locales v0.13.0 // indirect
+	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/go-zookeeper/zk v1.0.1
 	github.com/gobuffalo/packr/v2 v2.7.1
