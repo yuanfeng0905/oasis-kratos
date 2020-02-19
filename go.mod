@@ -9,6 +9,7 @@ require (
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f // indirect
 	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
+	github.com/cznic/b v0.0.0-20181122101859-a26611c4d92d // indirect
 	github.com/dgryski/go-farm v0.0.0-20190423205320-6a90982ecee2
 	github.com/fatih/color v1.7.0
 	github.com/fsnotify/fsnotify v1.4.7
@@ -22,6 +23,7 @@ require (
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/google/wire v0.3.0
 	github.com/gorilla/websocket v1.4.0 // indirect
+	github.com/jinzhu/gorm v1.9.12
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.10 // indirect
@@ -45,7 +47,6 @@ require (
 	go.etcd.io/etcd v0.0.0-20190917205325-a14579fbfb1a
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/multierr v1.2.0 // indirect
-	golang.org/x/crypto v0.0.0-20191105034135-c7e5f84aec59 // indirect
 	golang.org/x/net v0.0.0-20191011234655-491137f69257
 	golang.org/x/sys v0.0.0-20191105231009-c1f44814a5cd // indirect
 	golang.org/x/tools v0.0.0-20191105231337-689d0f08e67a

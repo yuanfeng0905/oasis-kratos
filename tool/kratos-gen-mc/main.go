@@ -14,7 +14,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/yuanfeng0905/oasis-kratos/tool/pkg"
+	common "github.com/yuanfeng0905/oasis-kratos/tool/pkg"
 )
 
 var (
