@@ -61,7 +61,8 @@ func (app *App) registerSelf() (cancel context.CancelFunc, err error) {
 		AppID:    env.AppID,
 		Hostname: env.Hostname,
 		Addrs: []string{
-			"http://" + app.http.Server().Addr, // default scheme only support HTTP
+			"http://" + app.http.Server().Addr, 
+			"grpc://" + app.grpc.Addr(),
 		},
 	}
 	cancel, err = dis.Register(context.Background(), inst)
