@@ -69,5 +69,5 @@ func (d *dao) Ping(ctx context.Context) (err error) {
 }
 
 func (d *dao) Article(c context.Context, id int64) (*model.Article, error) {
-	return &model.Article{ID: 1, Context: "This is Content"}, nil
+	return &model.Article{ID: 1, Content: "This is Content"}, nil
 }

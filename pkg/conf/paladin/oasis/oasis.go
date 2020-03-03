@@ -3,6 +3,8 @@ package oasis
 import (
 	"context"
 	"errors"
+	"flag"
+	"fmt"
 	"log"
 	"net/url"
 	"os"
@@ -18,6 +20,9 @@ import (
 
 var (
 	_ paladin.Client = &oasis{}
+
+	// 缓存目录
+	_confCacheDir = "/tmp"
 )
 
 type Diff struct {
@@ -75,7 +80,12 @@ type Config struct {
 type oasisDriver struct{}
 
 func init() {
+	addFlags()
 	paladin.Register(PaladinDriverOasis, &oasisDriver{})
+}
+
+func addFlags() {
+	flag.StringVar(&_confCacheDir, "conf.cachedir", "/tmp", "remote config cache dir")
 }
 
 func buildConfigForOasis() (c *Config, err error) {
@@ -128,6 +138,41 @@ func (ad *oasisDriver) new(conf *Config) (paladin.Client, error) {
 	go a.watchproc()
 
 	return a, nil
+}
+
+func (a *oasis) start() error {
+	if err := a.autoCreateCacheDir(); err != nil {
+		return err
+	}
+
+	if err := a.preload(); err != nil {
+		return err
+	}
+
+	go a.watchproc()
+
+	return nil
+}
+
+// autoCreateCacheDir
+func (a *oasis) autoCreateCacheDir() error {
+	fs, err := os.Stat(a.config.CacheDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return os.MkdirAll(a.config.CacheDir, os.ModePerm)
+		}
+		return err
+	}
+	if !fs.IsDir() {
+		return fmt.Errorf("conf.CacheDir is not a dir")
+	}
+
+	return nil
+}
+
+func (a *oasis) preload() error {
+
+	return nil
 }
 
 // loadValues
@@ -273,8 +318,6 @@ func (a *oasis) watchproc() {
 
 // Get return value by key.
 func (a *oasis) Get(key string) *paladin.Value {
-	// 第一次加载，尝试从远程获取
-	// TODO 这里并发会出现多次请求，待优化
 	if _, err := a.values.Get(key).Raw(); err != nil {
 		val, err := a.loadValue(key)
 		if err != nil {
